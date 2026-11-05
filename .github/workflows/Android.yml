@@ -9,6 +9,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
+      - name: Unzip project if it was uploaded as a zip
+        run: |
+          if [ -f moon-play.zip ]; then unzip -q -o moon-play.zip -d unpacked; fi
       - name: Accept Android licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
       - uses: gradle/actions/setup-gradle@v4
@@ -18,7 +21,7 @@ jobs:
         run: |
           f=$(find . -name settings.gradle.kts -not -path "*/node_modules/*" | head -n 1)
           if [ -z "$f" ]; then
-            echo "No settings.gradle.kts found. The android/ folder was not uploaded to this repo."
+            echo "No settings.gradle.kts found."
             ls -R | head -50
             exit 1
           fi
