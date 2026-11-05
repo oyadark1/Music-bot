@@ -26,6 +26,10 @@ jobs:
             exit 1
           fi
           echo "dir=$(dirname "$f")" >> "$GITHUB_OUTPUT"
+      - name: Ensure gradle.properties (AndroidX)
+        working-directory: ${{ steps.find.outputs.dir }}
+        run: |
+          printf 'org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8\nandroid.useAndroidX=true\nkotlin.code.style=official\n' > gradle.properties
       - name: Build debug APK
         working-directory: ${{ steps.find.outputs.dir }}
         run: |
