@@ -13,12 +13,22 @@ jobs:
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: "8.9" }
+      - name: Find Android project
+        id: find
+        run: |
+          f=$(find . -name settings.gradle.kts -not -path "*/node_modules/*" | head -n 1)
+          if [ -z "$f" ]; then
+            echo "No settings.gradle.kts found. The android/ folder was not uploaded to this repo."
+            ls -R | head -50
+            exit 1
+          fi
+          echo "dir=$(dirname "$f")" >> "$GITHUB_OUTPUT"
       - name: Build debug APK
-        working-directory: android
+        working-directory: ${{ steps.find.outputs.dir }}
         run: gradle assembleDebug --no-daemon --stacktrace
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: MoonPlay-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          path: "**/build/outputs/apk/debug/*.apk"
           if-no-files-found: warn
